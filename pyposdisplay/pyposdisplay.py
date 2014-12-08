@@ -32,7 +32,104 @@ __author__ = "Akretion <contact@akretion.com>"
 __version__ = "0.0.1"
 
 
+#    itersubclasses
+#    Author: Joel Grand-Guillaume
+#    Copyright 2011-2012 Camptocamp SA
+#    Licence AGPL v3
+def itersubclasses(cls, _seen=None):
+    """
+    itersubclasses(cls)
+
+    Generator over all subclasses of a given class, in depth first order.
+
+    >>> list(itersubclasses(int)) == [bool]
+    True
+    >>> class A(object): pass
+    >>> class B(A): pass
+    >>> class C(A): pass
+    >>> class D(B,C): pass
+    >>> class E(D): pass
+    >>>
+    >>> for cls in itersubclasses(A):
+    ...     print(cls.__name__)
+    B
+    D
+    E
+    C
+    >>> # get ALL (new-style) classes currently defined
+    >>> [cls.__name__ for cls in itersubclasses(object)] #doctest: +ELLIPSIS
+    ['type', ...'tuple', ...]
+    """
+    if not isinstance(cls, type):
+        raise TypeError('itersubclasses must be called with '
+                        'new-style classes, not %.100r' % cls)
+    if _seen is None:
+        _seen = set()
+    try:
+        subs = cls.__subclasses__()
+    except TypeError:  # fails only when cls is type
+        subs = cls.__subclasses__(cls)
+    for sub in subs:
+        if sub not in _seen:
+            _seen.add(sub)
+            yield sub
+            for sub in itersubclasses(sub, _seen):
+                yield sub
+
+
 class Driver(object):
+
+    def __init__(self, name, config=None):
+        if config is None:
+            config = {}
+        self.driver = self._get_driver(name, config)
+
+    def _get_driver(self, name, config):
+        available_driver = []
+        for cls in itersubclasses(AbstractDriver):
+            if cls._name == name:
+                return cls(config)
+            else:
+                available_driver.append(cls._name)
+        raise ValueError(
+            'The driver %s do not exist. Available driver : %s'
+            % (name, available_driver))
+
+    def send_text(self, lines):
+        assert isinstance(lines, list), 'lines should be a list'
+        self.driver.send_text(lines)
+
+
+class AbstractDriver(object):
+    """ The Abstract class is the base driver class for the display
+    Every driver must inherit this class.
+
+    You can define a new class by adding
+
+    class MyNewDriver(AbstractDriver):
+        _name = 'mynewdriver'
+
+        def send_text(self, lines):
+            #code to print the text on your device
+
+
+    You can also add a new driver by creating a new one based on
+    an existing one
+
+    class Bixolon2000Driver(BixolonDriver):
+        _name = 'bixolon2000'
+
+        def send_text(self, lines):
+            lines = ['I am Bixolon 2000', lines[0]]
+            super(Bixolon2000Driver, self).send_text(lines)
+    """
+
+    def send_text(self, lines):
+        raise NotImplemented
+
+
+class BixolonDriver(AbstractDriver):
+    _name = 'bixolon'
 
     def __init__(self, config):
         self.device_name = config.get(
@@ -86,7 +183,7 @@ class Driver(object):
         assert isinstance(text, str), 'text must be a string'
         self.serial.write(text)
 
-    def send_text_customer_display(self, text_to_display):
+    def send_text(self, lines):
         '''This function sends the data to the serial/usb port.
         We open and close the serial connection on every message display.
         Why ?
@@ -96,8 +193,6 @@ class Driver(object):
         customer display and it will work again on the next message without
         problem
         '''
-        lines = simplejson.loads(text_to_display)
-        assert isinstance(lines, list), 'lines_list should be a list'
         try:
             _logger.debug(
                 'Opening serial port %s for customer display with baudrate %d'
@@ -111,6 +206,7 @@ class Driver(object):
             self.display_text(lines)
         except Exception, e:
             _logger.error('Exception in serial connection: %s' % str(e))
+            raise
         finally:
             if self.serial:
                 _logger.debug('Closing serial port for customer display')
