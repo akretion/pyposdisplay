@@ -1,0 +1,4 @@
+simplejson
+unidecode
+pyserial
+pyusb
