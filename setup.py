@@ -1,7 +1,6 @@
 from setuptools import setup
 from codecs import open
 from os import path
-import pyposdisplay
 
 here = path.abspath(path.dirname(__file__))
 
@@ -10,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='pyposdisplay',
-    version = pyposdisplay.pyposdisplay.__version__,
+    version = '0.0.1',
 
     description='Python librarie for supporting Point Of Sale Display',
     long_description=long_description,

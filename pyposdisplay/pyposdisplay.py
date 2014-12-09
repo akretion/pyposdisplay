@@ -83,6 +83,7 @@ class Driver(object):
         if config is None:
             config = {}
         self.driver = self._get_driver(name, config)
+        super(Driver, self).__init__()
 
     def _get_driver(self, name, config):
         available_driver = []
