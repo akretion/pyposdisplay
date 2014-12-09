@@ -13,6 +13,7 @@ It has been tested with:
 
 
 For kernel <= 3.12 you have to add this code in /etc/udev/99-pyposdisplay.rules
+
 ```
 ACTION=="add", ATTRS{idVendor}=="1504", ATTRS{idProduct}=="0011", RUN+="/sbin/modprobe ftdi_sio", RUN+="/bin/sh -c 'echo 1504 0011 > /sys/bus/usb-serial/drivers/ftdi_sio/new_id'"
 ```
