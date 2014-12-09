@@ -29,9 +29,6 @@ import usb.core
 import logging
 _logger = logging.getLogger(__name__)
 
-__author__ = "Akretion <contact@akretion.com>"
-__version__ = "0.0.2"
-
 
 #    itersubclasses
 #    Author: Joel Grand-Guillaume

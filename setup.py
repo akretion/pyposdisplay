@@ -1,23 +1,15 @@
 from setuptools import setup
-from codecs import open
-from os import path
-
-here = path.abspath(path.dirname(__file__))
-
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+version = open('VERSION').read().strip()
 
 setup(
     name='pyposdisplay',
-    version = '0.0.2',
-
-    description='Python librarie for supporting Point Of Sale Display',
-    long_description=long_description,
-
-    url='https://github.com/akretion/pyposdisplay',
+    version='0.0.2',
     author='Akretion',
     author_email='contact@akretion.com',
-    license='AGPLv3',
+    url='https://github.com/akretion/pyposdisplay',
+    description='Python librarie for supporting Point Of Sale Display',
+    long_description=open('README.md').read(),
+    license='AGPLv3+',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
@@ -27,5 +19,6 @@ setup(
     ],
     keywords='bixolon lcd display pos point of sale',
     packages=['pyposdisplay'],
-    install_requires=['simplejson', 'unidecode', 'pyserial', 'pyusb'],
+    install_requires=[r.strip() for r in
+                      open('requirement.txt').read().splitlines()],
 )
