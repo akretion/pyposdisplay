@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='pyposdisplay',
-    version = '0.0.1',
+    version = '0.0.2',
 
     description='Python librarie for supporting Point Of Sale Display',
     long_description=long_description,
@@ -27,5 +27,5 @@ setup(
     ],
     keywords='bixolon lcd display pos point of sale',
     packages=['pyposdisplay'],
-    install_requires=['simplejson', 'unidecode', 'pyserial'],
+    install_requires=['simplejson', 'unidecode', 'pyserial', 'pyusb'],
 )

@@ -25,11 +25,12 @@ import simplejson
 import time
 from unidecode import unidecode
 from serial import Serial
+import usb.core
 import logging
 _logger = logging.getLogger(__name__)
 
 __author__ = "Akretion <contact@akretion.com>"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 
 #    itersubclasses
@@ -78,20 +79,41 @@ def itersubclasses(cls, _seen=None):
 
 
 class Driver(object):
+    _default_driver = 'bixolon'
 
-    def __init__(self, name, config=None):
-        if config is None:
-            config = {}
-        self.driver = self._get_driver(name, config)
+    def __init__(self, config=None, use_driver_name=None):
+        self.driver = self._get_driver(
+            config=config,
+            use_driver_name=use_driver_name)
         super(Driver, self).__init__()
 
-    def _get_driver(self, name, config):
+    def _get_driver(self, config=None, use_driver_name=None):
+        if config is None:
+            config = {}
         available_driver = []
-        for cls in itersubclasses(AbstractDriver):
-            if cls._name == name:
-                return cls(config)
-            else:
-                available_driver.append(cls._name)
+        if use_driver_name:
+            for cls in itersubclasses(AbstractDriver):
+                if cls._name == use_driver_name:
+                    return cls(config)
+                else:
+                    available_driver.append(cls._name)
+        else:
+            for hardware in usb.core.find(find_all=True):
+                hardware_id = (hex(hardware.idVendor), hex(hardware.idProduct))
+                for cls in itersubclasses(AbstractDriver):
+                    if hardware_id in cls._vendor_id_product_id:
+                        _logger.debug(
+                            'Hardware found! Vendor id %s Product id %s '
+                            'use driver %s' % (
+                                hardware_id[0],
+                                hardware_id[1],
+                                cls._name))
+                        return cls(config)
+            _logger.debug('Not Driver found, use default driver %s'
+                         % self._default_driver)
+            return self._get_driver(
+                config=config,
+                use_driver_name=self._default_driver)
         raise ValueError(
             'The driver %s do not exist. Available driver : %s'
             % (name, available_driver))
@@ -131,6 +153,10 @@ class AbstractDriver(object):
 
 class BixolonDriver(AbstractDriver):
     _name = 'bixolon'
+    _vendor_id_product_id = [
+        #(vendor_id, product_id)
+        ('0x1504', '0x11'),
+    ]
 
     def __init__(self, config):
         self.device_name = config.get(
