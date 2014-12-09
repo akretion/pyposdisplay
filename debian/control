@@ -1,0 +1,17 @@
+Source: pyposdisplay
+Section: admin
+Priority: extra
+Maintainer: Sébastien Beau <sebastien.beau@akretion.com>
+Build-Depends: debhelper (>= 9), python-setuptools, python-all
+X-Python-Version: >= 2.4
+VCS-Git: git://github.com/akretion/pywebdriver.git
+VCS-Browser: https://github.com/akretion/pywebdriver
+Standards-Version: 1.0.0
+Homepage: https://github.com/akretion/pywebdriver
+
+Package: python-pyposdisplay
+Architecture: all
+Depends: python, python-simplejson, python-serial, python-unidecode
+ ${misc:Depends},
+Description: Python Libraries for interacting with Point of Sale
+ Customer Display

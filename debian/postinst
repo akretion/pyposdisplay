@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+# TODO create deb packages for these dependencies
+echo "Installing python dependencies via pip"
+pip install --pre pyusb
+
+echo "Restarting udev"
+restart udev
