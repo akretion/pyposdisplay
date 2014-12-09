@@ -11,7 +11,7 @@ Homepage: https://github.com/akretion/pywebdriver
 
 Package: python-pyposdisplay
 Architecture: all
-Depends: python-simplejson, python-serial, python-unidecode 
+Depends: python, python-simplejson, python-serial, python-unidecode
  ${misc:Depends},
 Description: Python Libraries for interacting with Point of Sale
  Customer Display
