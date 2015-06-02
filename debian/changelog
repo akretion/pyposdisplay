@@ -1,3 +1,9 @@
+pyposdisplay (0.0.2-0ubuntu1) trusty; urgency=medium
+
+  * Bump version
+
+ -- Sylvain Calador <sylvain.calador@gmail.com>  Tue, 02 Jun 2015 10:36:05 +0200
+
 pyposdisplay (0.0.2-1) UNRELEASED; urgency=medium
 
   [ Sébastien BEAU ]
