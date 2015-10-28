@@ -152,7 +152,8 @@ class BixolonDriver(AbstractDriver):
     _name = 'bixolon'
     _vendor_id_product_id = [
         #(vendor_id, product_id)
-        ('0x1504', '0x11'),
+        ('0x1504', '0x11'),  # BCD-1100
+        ('0x0403', '0x6001'),  # BCD-1000
     ]
 
     def __init__(self, config):
