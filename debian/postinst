@@ -6,4 +6,4 @@ echo "Installing python dependencies via pip"
 pip install --pre pyusb
 
 echo "Restarting udev"
-restart udev
+service udev restart

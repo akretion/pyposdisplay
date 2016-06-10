@@ -1,3 +1,9 @@
+pyposdisplay (0.0.3-0ubuntu1) xenial; urgency=medium
+
+  * Avoid using upstart as service manager in debian post install
+
+ -- Sylvain Calador <sylvain.calador@gmail.com>  Fri, 10 Jun 2016 15:02:47 +0200
+
 pyposdisplay (0.0.2-0ubuntu1) trusty; urgency=medium
 
   * Bump version
