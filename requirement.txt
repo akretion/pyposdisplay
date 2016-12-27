@@ -1,4 +1,3 @@
-simplejson
 unidecode
 pyserial
 pyusb

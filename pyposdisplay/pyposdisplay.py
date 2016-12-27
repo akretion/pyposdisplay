@@ -2,7 +2,7 @@
 ###############################################################################
 #
 #   Python Point Of Sale Display Librarie
-#   Copyright (C) 2014 Akretion (http://www.akretion.com).
+#   Copyright (C) 2014-2016 Akretion (http://www.akretion.com).
 #   @author Alexis de Lattre <alexis.delattre@akretion.com>
 #   @author Sébastien BEAU <sebastien.beau@akretion.com>
 #
@@ -21,8 +21,6 @@
 #
 ###############################################################################
 
-import simplejson
-import time
 from unidecode import unidecode
 from serial import Serial
 import usb.core
@@ -107,13 +105,13 @@ class Driver(object):
                                 cls._name))
                         return cls(config)
             _logger.debug('Not Driver found, use default driver %s'
-                         % self._default_driver)
+                          % self._default_driver)
             return self._get_driver(
                 config=config,
                 use_driver_name=self._default_driver)
         raise ValueError(
             'The driver %s do not exist. Available driver : %s'
-            % (name, available_driver))
+            % (use_driver_name, available_driver))
 
     def send_text(self, lines):
         assert isinstance(lines, list), 'lines should be a list'
@@ -144,30 +142,33 @@ class AbstractDriver(object):
             super(Bixolon2000Driver, self).send_text(lines)
     """
 
-    def send_text(self, lines):
-        raise NotImplemented
-
-
-class BixolonDriver(AbstractDriver):
-    _name = 'bixolon'
-    _vendor_id_product_id = [
-        #(vendor_id, product_id)
-        ('0x1504', '0x11'),  # BCD-1100
-        ('0x0403', '0x6001'),  # BCD-1000
-    ]
-
     def __init__(self, config):
         self.device_name = config.get(
             'customer_display_device_name', '/dev/ttyUSB0')
         self.device_rate = int(config.get(
             'customer_display_device_rate', 9600))
-        self.device_timeout = int(config.get(
-            'customer_display_device_timeout', 2))
+        self.device_timeout = float(config.get(
+            'customer_display_device_timeout', 0.05))
         self.serial = False
 
-    def move_cursor(self, col, row):
-        # Bixolon spec : 11. "Move Cursor to Specified Position"
-        self.cmd_serial_write('\x1B\x6C' + chr(col) + chr(row))
+    def cmd_serial_write(self, command):
+        '''If your LCD requires a prefix and/or suffix on all commands,
+        you should inherit this function'''
+        assert isinstance(command, str), 'command must be a string'
+        self.serial_write(command)
+
+    def serial_write(self, text):
+        assert isinstance(text, str), 'text must be a string'
+        self.serial.write(text)
+
+    def clear_customer_display(self):
+        '''If your LCD has different clearing instruction, you should inherit
+        this function'''
+        # Bixolon spec : 12. "Clear Display Screen and Clear String Mode"
+        # This seems to be common to several displays, so I put it in the
+        # abstract driver
+        self.cmd_serial_write('\x0C')
+        _logger.debug('Customer display cleared')
 
     def display_text(self, lines):
         _logger.debug(
@@ -182,31 +183,6 @@ class BixolonDriver(AbstractDriver):
             row += 1
             self.move_cursor(1, row)
             self.serial_write(dline)
-
-    def setup_customer_display(self):
-        '''Set LCD cursor to off
-        If your LCD has different setup instruction(s), you should
-        inherit this function'''
-        # Bixolon spec : 35. "Set Cursor On/Off"
-        self.cmd_serial_write('\x1F\x43\x00')
-        _logger.debug('LCD cursor set to off')
-
-    def clear_customer_display(self):
-        '''If your LCD has different clearing instruction, you should inherit
-        this function'''
-        # Bixolon spec : 12. "Clear Display Screen and Clear String Mode"
-        self.cmd_serial_write('\x0C')
-        _logger.debug('Customer display cleared')
-
-    def cmd_serial_write(self, command):
-        '''If your LCD requires a prefix and/or suffix on all commands,
-        you should inherit this function'''
-        assert isinstance(command, str), 'command must be a string'
-        self.serial_write(command)
-
-    def serial_write(self, text):
-        assert isinstance(text, str), 'text must be a string'
-        self.serial.write(text)
 
     def send_text(self, lines):
         '''This function sends the data to the serial/usb port.
@@ -236,3 +212,50 @@ class BixolonDriver(AbstractDriver):
             if self.serial:
                 _logger.debug('Closing serial port for customer display')
                 self.serial.close()
+
+
+class BixolonDriver(AbstractDriver):
+    _name = 'bixolon'
+    _vendor_id_product_id = [
+        # (vendor_id, product_id)
+        ('0x1504', '0x11'),  # BCD-1100
+        ('0x0403', '0x6001'),  # BCD-1000
+    ]
+
+    def move_cursor(self, col, row):
+        # Bixolon spec : 11. "Move Cursor to Specified Position"
+        self.cmd_serial_write('\x1B\x6C' + chr(col) + chr(row))
+
+    def setup_customer_display(self):
+        '''Set LCD cursor to off
+        If your LCD has different setup instruction(s), you should
+        inherit this function'''
+        # Bixolon spec : 35. "Set Cursor On/Off"
+        self.cmd_serial_write('\x1F\x43\x00')
+        _logger.debug('LCD cursor set to off')
+
+
+class EpsonDriver(AbstractDriver):
+    _name = 'epson'
+    _vendor_id_product_id = [
+        # The Epson DM-D110 model I tested was a serial one,
+        # with an external USB/serial adapter, so I don't have
+        # USB-IDs to write here
+    ]
+
+    def move_cursor(self, col, row):
+        self.cmd_serial_write('\x1F\x24' + chr(col) + chr(row))
+
+    def setup_customer_display(self):
+        self.cmd_serial_write(chr(27) + chr(64))
+        self.cmd_serial_write(
+            chr(31) + chr(40) + chr(68) + chr(4) + chr(0) + chr(3) +
+            chr(101) + chr(1) + chr(2))
+        # "Set Cursor Off"
+        self.cmd_serial_write('\x1F\x43\x00')
+        _logger.debug('LCD cursor set to off')
+
+    def serial_write(self, text):
+        assert isinstance(text, str), 'text must be a string'
+        self.serial.write(text)
+        self.serial.read()
