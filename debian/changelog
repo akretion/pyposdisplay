@@ -2,7 +2,7 @@ pyposdisplay (0.0.4-0ubuntu1) xenial; urgency=medium
 
   * Add support for Epson DM-D110 display
 
- -- Alexis de Lattre <alexis.delattre@akretion.com>  Fri, 30 Dec 2016 11:28:42 +0100
+ -- Alexis de Lattre <alexis@via.ecp.fr>  Fri, 30 Dec 2016 11:28:42 +0100
 
 pyposdisplay (0.0.3-0ubuntu1) xenial; urgency=medium
 
