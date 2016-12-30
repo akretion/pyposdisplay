@@ -1,4 +1,4 @@
-pyposdisplay (0.0.3-0ubuntu2) xenial; urgency=medium
+pyposdisplay (0.0.4-0ubuntu1) xenial; urgency=medium
 
   * Add support for Epson DM-D110 display
 
