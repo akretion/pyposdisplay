@@ -1,7 +1,7 @@
 Hardware Customer Display
 =========================
 
-Python librarie for supporting Customer Point Of Sale Display.
+Python library for supporting Customer Point Of Sale Display.
 
 It should support most serial and USB-serial LCD displays out-of-the-box
 or with inheritance of a few functions.
