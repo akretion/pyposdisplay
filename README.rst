@@ -13,7 +13,7 @@ It has been tested with:
 * Epson DM-D110 (model M58DB)
 
 
-For kernel <= 3.12 you have to add this code in /etc/udev/99-pyposdisplay.rules
+For kernel <= 3.12 you have to add this code in /etc/udev/rules.d/99-pyposdisplay.rules
 
 ```
 ACTION=="add", ATTRS{idVendor}=="1504", ATTRS{idProduct}=="0011", RUN+="/sbin/modprobe ftdi_sio", RUN+="/bin/sh -c 'echo 1504 0011 > /sys/bus/usb-serial/drivers/ftdi_sio/new_id'"
