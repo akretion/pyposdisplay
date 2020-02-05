@@ -182,7 +182,7 @@ class AbstractDriver(object):
         for dline in lines_ascii:
             row += 1
             self.move_cursor(1, row)
-            self.serial_write(dline)
+            self.serial_write(dline.encode("ascii"))
 
     def send_text(self, lines):
         '''This function sends the data to the serial/usb port.
