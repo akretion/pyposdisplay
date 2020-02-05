@@ -154,11 +154,11 @@ class AbstractDriver(object):
     def cmd_serial_write(self, command):
         '''If your LCD requires a prefix and/or suffix on all commands,
         you should inherit this function'''
-        assert isinstance(command, str), 'command must be a string'
+        assert isinstance(command, bytes), 'command must be bytes'
         self.serial_write(command)
 
     def serial_write(self, text):
-        assert isinstance(text, str), 'text must be a string'
+        assert isinstance(text, bytes), 'text must be bytes'
         self.serial.write(text)
 
     def clear_customer_display(self):
@@ -167,7 +167,7 @@ class AbstractDriver(object):
         # Bixolon spec : 12. "Clear Display Screen and Clear String Mode"
         # This seems to be common to several displays, so I put it in the
         # abstract driver
-        self.cmd_serial_write('\x0C')
+        self.cmd_serial_write(b'\x0C')
         _logger.debug('Customer display cleared')
 
     def display_text(self, lines):
@@ -224,14 +224,14 @@ class BixolonDriver(AbstractDriver):
 
     def move_cursor(self, col, row):
         # Bixolon spec : 11. "Move Cursor to Specified Position"
-        self.cmd_serial_write('\x1B\x6C' + chr(col) + chr(row))
+        self.cmd_serial_write(b'\x1B\x6C' + chr(col) + chr(row))
 
     def setup_customer_display(self):
         '''Set LCD cursor to off
         If your LCD has different setup instruction(s), you should
         inherit this function'''
         # Bixolon spec : 35. "Set Cursor On/Off"
-        self.cmd_serial_write('\x1F\x43\x00')
+        self.cmd_serial_write(b'\x1F\x43\x00')
         _logger.debug('LCD cursor set to off')
 
 
@@ -244,7 +244,7 @@ class EpsonDriver(AbstractDriver):
     ]
 
     def move_cursor(self, col, row):
-        self.cmd_serial_write('\x1F\x24' + chr(col) + chr(row))
+        self.cmd_serial_write(b'\x1F\x24' + chr(col) + chr(row))
 
     def setup_customer_display(self):
         self.cmd_serial_write(chr(27) + chr(64))
@@ -252,7 +252,7 @@ class EpsonDriver(AbstractDriver):
             chr(31) + chr(40) + chr(68) + chr(4) + chr(0) + chr(3) +
             chr(101) + chr(1) + chr(2))
         # "Set Cursor Off"
-        self.cmd_serial_write('\x1F\x43\x00')
+        self.cmd_serial_write(b'\x1F\x43\x00')
         _logger.debug('LCD cursor set to off')
 
     def serial_write(self, text):
