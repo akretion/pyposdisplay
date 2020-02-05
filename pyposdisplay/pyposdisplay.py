@@ -224,7 +224,7 @@ class BixolonDriver(AbstractDriver):
 
     def move_cursor(self, col, row):
         # Bixolon spec : 11. "Move Cursor to Specified Position"
-        self.cmd_serial_write(b''.join(b'\x1B\x6C', bytes[col], bytes[row]))
+        self.cmd_serial_write(b'\x1B\x6C' + (chr(col) + chr(row)).encode('ascii'))
 
     def setup_customer_display(self):
         '''Set LCD cursor to off
@@ -244,7 +244,7 @@ class EpsonDriver(AbstractDriver):
     ]
 
     def move_cursor(self, col, row):
-        self.cmd_serial_write(b''.join(b'\x1F\x24', bytes[col], bytes[row]))
+        self.cmd_serial_write(b'\x1F\x24' + (chr(col) + chr(row)).encode('ascii'))
 
     def setup_customer_display(self):
         self.cmd_serial_write(bytes[27] + bytes[64])
@@ -256,6 +256,6 @@ class EpsonDriver(AbstractDriver):
         _logger.debug('LCD cursor set to off')
 
     def serial_write(self, text):
-        assert isinstance(text, str), 'text must be a string'
+        assert isinstance(text, bytes), 'text must be bytes'
         self.serial.write(text)
         self.serial.read()
