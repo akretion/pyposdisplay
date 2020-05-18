@@ -205,7 +205,7 @@ class AbstractDriver(object):
             self.setup_customer_display()
             self.clear_customer_display()
             self.display_text(lines)
-        except Exception, e:
+        except Exception as e:
             _logger.error('Exception in serial connection: %s' % str(e))
             raise
         finally:
