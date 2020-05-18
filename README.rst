@@ -11,7 +11,14 @@ It has been tested with:
 * Bixolon BCD-1100 (Datasheet : http://www.bixolon.com/html/en/product/product_detail.xhtml?prod_id=61)
 * Bixolon BCD-1000
 * Epson DM-D110 (model M58DB)
+* Epson OCD300 : http://www.aures-support.fr/NEWSITE/afficheurs-ocd100150
 
+For Epson OCD300, change pywebdriver/config/config.ini :
+
+```
+[display_driver]
+device_name=/dev/ttyACM0
+```
 
 For kernel <= 3.12 you have to add this code in /etc/udev/rules.d/99-pyposdisplay.rules
 
