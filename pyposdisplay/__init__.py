@@ -1,1 +1,1 @@
-from pyposdisplay import Driver
+from .pyposdisplay import Driver
