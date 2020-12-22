@@ -3,7 +3,7 @@ version = open('VERSION', "r", encoding="utf8").read().strip()
 
 setup(
     name='pyposdisplay',
-    version='0.0.5',
+    version='0.0.6',
     author='Akretion',
     author_email='contact@akretion.com',
     url='https://github.com/akretion/pyposdisplay',
@@ -11,11 +11,11 @@ setup(
     long_description=open('README.rst', "r", encoding="utf8").read(),
     license='AGPLv3+',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: User Interfaces',
         'License :: OSI Approved :: GNU Affero General Public License v3',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
     ],
     keywords='bixolon epson lcd display pos point of sale',
     packages=find_packages(),

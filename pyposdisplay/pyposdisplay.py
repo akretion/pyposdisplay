@@ -218,13 +218,14 @@ class BixolonDriver(AbstractDriver):
     _name = 'bixolon'
     _vendor_id_product_id = [
         # (vendor_id, product_id)
+        ('0x1504', '0x8c'),  # BCD-2000 in BCD-2000K config mode
         ('0x1504', '0x11'),  # BCD-1100
         ('0x0403', '0x6001'),  # BCD-1000
     ]
 
     def move_cursor(self, col, row):
         # Bixolon spec : 11. "Move Cursor to Specified Position"
-        self.cmd_serial_write(b'\x1B\x6C' + (chr(col) + chr(row)).encode('ascii'))
+        self.cmd_serial_write(b'\x1F\x24' + (chr(col) + chr(row)).encode('ascii'))
 
     def setup_customer_display(self):
         '''Set LCD cursor to off
