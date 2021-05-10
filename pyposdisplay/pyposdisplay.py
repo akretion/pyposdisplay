@@ -23,6 +23,7 @@
 
 from unidecode import unidecode
 from serial import Serial
+import serial.tools.list_ports
 import usb.core
 import logging
 _logger = logging.getLogger(__name__)
@@ -117,6 +118,19 @@ class Driver(object):
         assert isinstance(lines, list), 'lines should be a list'
         self.driver.send_text(lines)
 
+    def get_status(self):
+        status = "disconnected"
+        messages = []
+        connected_comports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
+        _logger.info(connected_comports)
+        ports = [p[0] for p in connected_comports]
+        if self.driver.device_name in ports:
+            status = "connected"
+        else:
+            devices = [p[1] for p in connected_comports]
+            messages = ["Available device:"] + devices
+        return {"status": status, "messages": messages}
+
 
 class AbstractDriver(object):
     """ The Abstract class is the base driver class for the display
@@ -150,6 +164,17 @@ class AbstractDriver(object):
         self.device_timeout = float(config.get(
             'customer_display_device_timeout', 0.05))
         self.serial = False
+        if self.device_name == "auto":
+            self.device_name = self._find_auto_device_name()
+
+    def _find_auto_device_name(self):
+        connected_comports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
+        _logger.info(connected_comports)
+        for port in connected_comports:
+            # Name of serial to USB main providers
+            strings_to_find = ["Serial", "serial", "Prolific", "prolific", "FVDI"]
+            if any(string in port[1] for string in strings_to_find):
+                return port[0]
 
     def cmd_serial_write(self, command):
         '''If your LCD requires a prefix and/or suffix on all commands,
