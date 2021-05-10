@@ -23,6 +23,7 @@
 
 from unidecode import unidecode
 from serial import Serial
+import serial.tools.list_ports
 import usb.core
 import logging
 _logger = logging.getLogger(__name__)
@@ -117,6 +118,19 @@ class Driver(object):
         assert isinstance(lines, list), 'lines should be a list'
         self.driver.send_text(lines)
 
+    def get_status(self):
+        status = "disconnected"
+        messages = []
+        connected_comports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
+        _logger.info(connected_comports)
+        ports = [p[0] for p in connected_comports]
+        if self.driver.device_name in ports:
+            status = "connected"
+        else:
+            devices = [p[1] for p in connected_comports]
+            messages = ["Available device:"] + devices
+        return {"status": status, "messages": messages}
+
 
 class AbstractDriver(object):
     """ The Abstract class is the base driver class for the display
@@ -150,6 +164,17 @@ class AbstractDriver(object):
         self.device_timeout = float(config.get(
             'customer_display_device_timeout', 0.05))
         self.serial = False
+        if self.device_name == "auto":
+            self.device_name = self._find_auto_device_name()
+
+    def _find_auto_device_name(self):
+        connected_comports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
+        _logger.info(connected_comports)
+        for port in connected_comports:
+            # Name of serial to USB main providers
+            strings_to_find = ["Serial", "serial", "Prolific", "prolific", "FVDI"]
+            if any(string in port[1] for string in strings_to_find):
+                return port[0]
 
     def cmd_serial_write(self, command):
         '''If your LCD requires a prefix and/or suffix on all commands,
@@ -178,11 +203,12 @@ class AbstractDriver(object):
         lines_ascii = []
         for line in lines:
             lines_ascii.append(unidecode(line))
-        row = 0
-        for dline in lines_ascii:
-            row += 1
-            self.move_cursor(1, row)
+        self.clear_customer_display()
+        for i, dline in enumerate(lines_ascii):
             self.serial_write(dline.encode("ascii"))
+            # Do not go to new line if this is the last one
+            if i < len(lines_ascii) - 1:
+                self.newline()
 
     def send_text(self, lines):
         '''This function sends the data to the serial/usb port.
@@ -203,7 +229,6 @@ class AbstractDriver(object):
                 timeout=self.device_timeout)
             _logger.debug('serial.is_open = %s' % self.serial.isOpen())
             self.setup_customer_display()
-            self.clear_customer_display()
             self.display_text(lines)
         except Exception as e:
             _logger.error('Exception in serial connection: %s' % str(e))
@@ -212,6 +237,22 @@ class AbstractDriver(object):
             if self.serial:
                 _logger.debug('Closing serial port for customer display')
                 self.serial.close()
+
+    def newline(self):
+        _logger.debug('Move one line down')
+        self.move_down()
+        self.carriage_return()
+
+    def move_down(self):
+        self.cmd_serial_write(b'\x0A')
+
+    def carriage_return(self):
+        self.cmd_serial_write(b'\x0D')
+
+    def move_cursor(self, col, row):
+        # Not used anymore but can be useful
+        # Bixolon spec : 11. "Move Cursor to Specified Position"
+        self.cmd_serial_write(b'\x1F\x24' + (chr(col) + chr(row)).encode('ascii'))
 
 
 class BixolonDriver(AbstractDriver):
@@ -222,10 +263,6 @@ class BixolonDriver(AbstractDriver):
         ('0x1504', '0x11'),  # BCD-1100
         ('0x0403', '0x6001'),  # BCD-1000
     ]
-
-    def move_cursor(self, col, row):
-        # Bixolon spec : 11. "Move Cursor to Specified Position"
-        self.cmd_serial_write(b'\x1F\x24' + (chr(col) + chr(row)).encode('ascii'))
 
     def setup_customer_display(self):
         '''Set LCD cursor to off
@@ -243,9 +280,6 @@ class EpsonDriver(AbstractDriver):
         # with an external USB/serial adapter, so I don't have
         # USB-IDs to write here
     ]
-
-    def move_cursor(self, col, row):
-        self.cmd_serial_write(b'\x1F\x24' + (chr(col) + chr(row)).encode('ascii'))
 
     def setup_customer_display(self):
         self.cmd_serial_write(bytes[27] + bytes[64])
