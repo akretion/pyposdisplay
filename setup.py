@@ -3,7 +3,7 @@ version = open('VERSION', "r", encoding="utf8").read().strip()
 
 setup(
     name='pyposdisplay',
-    version='0.0.6',
+    version='0.0.7',
     author='Akretion',
     author_email='contact@akretion.com',
     url='https://github.com/akretion/pyposdisplay',
