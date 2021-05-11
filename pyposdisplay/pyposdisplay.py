@@ -122,7 +122,7 @@ class Driver(object):
         status = "disconnected"
         messages = []
         connected_comports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
-        _logger.info(connected_comports)
+        _logger.debug(connected_comports)
         ports = [p[0] for p in connected_comports]
         if self.driver.device_name in ports:
             status = "connected"
@@ -169,7 +169,7 @@ class AbstractDriver(object):
 
     def _find_auto_device_name(self):
         connected_comports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
-        _logger.info(connected_comports)
+        _logger.debug(connected_comports)
         for port in connected_comports:
             # Name of serial to USB main providers
             strings_to_find = ["Serial", "serial", "Prolific", "prolific", "FVDI"]
