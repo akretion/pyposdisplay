@@ -208,7 +208,7 @@ class AbstractDriver(object):
             self.serial_write(dline.encode("ascii"))
             # Do not go to new line if this is the last one
             if i < len(lines_ascii) - 1:
-                self.move_cursor(1,i+2)
+                self.move_down(i+1) # Line number starts at 1
 
     def send_text(self, lines):
         '''This function sends the data to the serial/usb port.
@@ -238,6 +238,9 @@ class AbstractDriver(object):
                 _logger.debug('Closing serial port for customer display')
                 self.serial.close()
 
+    def move_down(self, row):
+        self.move_cursor(1, row + 1)
+
     def move_cursor(self, col, row):
         # Always use this function as it is stateless and depending on
         # The hardware the cursor behaviour can differ
@@ -263,6 +266,25 @@ class BixolonDriver(AbstractDriver):
         self.cmd_serial_write(b'\x1F\x43\x00')
         _logger.debug('LCD cursor set to off')
 
+class LabauDriver(AbstractDriver):
+    _name = 'labau'
+    _vendor_id_product_id = [
+        # (vendor_id, product_id)
+        ('0x067b', '0x2303'),  # Labau LD240
+    ]
+
+    def setup_customer_display(self):
+        '''Set LCD cursor to off
+        If your LCD has different setup instruction(s), you should
+        inherit this function'''
+        # Overwrite mode ? (no documentation)
+        self.cmd_serial_write(b'\x1F\x01')
+        _logger.debug('Overwrite mode')
+
+    def move_down(self, row):
+        _logger.debug('Move One line down')
+        self.cmd_serial_write(b'\x0A')
+        self.cmd_serial_write(b'\x0D')
 
 class EpsonDriver(AbstractDriver):
     _name = 'epson'
