@@ -208,7 +208,7 @@ class AbstractDriver(object):
             self.serial_write(dline.encode("ascii"))
             # Do not go to new line if this is the last one
             if i < len(lines_ascii) - 1:
-                self.newline()
+                self.move_cursor(1,i+2)
 
     def send_text(self, lines):
         '''This function sends the data to the serial/usb port.
@@ -238,20 +238,11 @@ class AbstractDriver(object):
                 _logger.debug('Closing serial port for customer display')
                 self.serial.close()
 
-    def newline(self):
-        _logger.debug('Move one line down')
-        self.move_down()
-        self.carriage_return()
-
-    def move_down(self):
-        self.cmd_serial_write(b'\x0A')
-
-    def carriage_return(self):
-        self.cmd_serial_write(b'\x0D')
-
     def move_cursor(self, col, row):
-        # Not used anymore but can be useful
+        # Always use this function as it is stateless and depending on
+        # The hardware the cursor behaviour can differ
         # Bixolon spec : 11. "Move Cursor to Specified Position"
+        _logger.debug(f'Move cursor to column {col} and line {row}')
         self.cmd_serial_write(b'\x1F\x24' + (chr(col) + chr(row)).encode('ascii'))
 
 
