@@ -172,7 +172,7 @@ class AbstractDriver(object):
         _logger.debug(connected_comports)
         for port in connected_comports:
             # Name of serial to USB main providers
-            strings_to_find = ["Serial", "serial", "Prolific", "prolific", "FVDI"]
+            strings_to_find = ["Serial", "serial", "Prolific", "prolific", "FVDI", "USB Virtual COM"]
             if any(string in port[1] for string in strings_to_find):
                 return port[0]
 
