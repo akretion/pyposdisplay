@@ -208,7 +208,7 @@ class AbstractDriver(object):
             self.serial_write(dline.encode("ascii"))
             # Do not go to new line if this is the last one
             if i < len(lines_ascii) - 1:
-                self.move_down(i+1) # Line number starts at 1
+                self.move_down(i+1)  # Line number starts at 1
 
     def send_text(self, lines):
         '''This function sends the data to the serial/usb port.
@@ -266,6 +266,7 @@ class BixolonDriver(AbstractDriver):
         self.cmd_serial_write(b'\x1F\x43\x00')
         _logger.debug('LCD cursor set to off')
 
+
 class LabauDriver(AbstractDriver):
     _name = 'labau'
     _vendor_id_product_id = [
@@ -286,20 +287,31 @@ class LabauDriver(AbstractDriver):
         self.cmd_serial_write(b'\x0A')
         self.cmd_serial_write(b'\x0D')
 
+
 class EpsonDriver(AbstractDriver):
     _name = 'epson'
     _vendor_id_product_id = [
-        # The Epson DM-D110 model I tested was a serial one,
-        # with an external USB/serial adapter, so I don't have
-        # USB-IDs to write here
+        ('0x1208', '0x0780'),  # Epson Seiko DM-D110
     ]
 
     def setup_customer_display(self):
-        self.cmd_serial_write(bytes[27] + bytes[64])
-        self.cmd_serial_write(b''.join(
-            bytes[31], bytes[40], bytes[68], bytes[4], bytes[0], bytes[3] +
-            bytes[101] + bytes[1] + bytes[2]))
-        # "Set Cursor Off"
+        # Initialize display (spec page 67)
+        # but no need to do it every time
+        # self.cmd_serial_write(b'\x1B\x40')
+        # Specifies the display mode for the current window (Function 3)
+        # (spec page 152)
+        # hexa : 1F 28 44 pl ph fn wno m1 m2 m3
+        # pl = 0x04
+        # ph = 0x00
+        # fn = 0x03
+        # m1 = 101 (0x65) : 20 col x 2 lines
+        # m2 (window background): 1 (nontransparent)
+        # m3 = 2
+        # self.cmd_serial_write(b'\x1F\x28\x44\x04\x00\x03\x01\x65\x01\x02')
+        # Note: Seems that, in the first version of the code using chr()
+        # the command was wrong and was missing 'wmo'
+        # same as previous: no need to do it every time
+        # Turn cursor display mode off (spec page 99)
         self.cmd_serial_write(b'\x1F\x43\x00')
         _logger.debug('LCD cursor set to off')
 
